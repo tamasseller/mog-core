@@ -11,6 +11,48 @@ as a registered `Extension` (`src/extension.ts`), so the core stays
 ignorant of what those opcodes mean while still proving every static
 guarantee over programs that use them.
 
+## Using it
+
+A procedure is C written inside an `` ir`...` `` template. `lowerProgram`
+compiles it, `run` is the reference VM.
+
+```ts
+import { ir, proc, lowerProgram, validateProgram, encodeProgram, run } from "mog-core"
+
+const sum = proc(["n"], ir`
+    u32 total = 0;
+    for (u32 i = 0; i != n; i++) total += i;
+    return total;
+`)
+
+run(lowerProgram(sum), undefined, [5]).acc   // 10
+```
+
+A `Procedure` spliced into the template is a call to it. `lowerProgram`
+walks out from the entry point and emits everything reachable, so only the
+entry is named:
+
+```ts
+const abs  = proc(["i32 v"], ir`return v < 0 ? -v : v;`)
+const dist = proc(["i32 a", "i32 b"], ir`return ${abs}(a - b);`)
+
+run(lowerProgram(dist), undefined, [3, 11]).acc   // 8
+```
+
+What the machine is actually for is the last step: a target gets the bytes,
+and the numbers it needs to size everything up front — before it runs a
+single instruction, and without trusting whoever sent the program.
+
+```ts
+const program = lowerProgram(dist)
+
+validateProgram(program)   // { procedures: [...], totalDepth: 3, maxCallDepth: 1 }
+encodeProgram(program)     // 22 bytes
+```
+
+`validateProgram` throws on anything isa-core.md §8 rejects, so a program
+that survives it needs no runtime checks for the things it proved.
+
 ## Docs
 
 - [docs/isa-core.md](docs/isa-core.md): the normative ISA spec. Abstract
@@ -40,9 +82,9 @@ guarantee over programs that use them.
 
 ## Companion
 
-`vscode-ir-syntax`, in the protocol-projection-language workspace, is a VS
-Code extension that syntax-highlights the C code inside `` ir`...` ``
-template literals.
+[`vscode-ir-syntax/`](vscode-ir-syntax) is a VS Code extension that
+syntax-highlights the C inside `` ir`...` `` template literals. It is not
+part of the npm package.
 
 ## Commands
 
