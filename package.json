@@ -6,11 +6,13 @@
     "type": "git",
     "url": "git+https://github.com/tamasseller/mog-core.git"
   },
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "docs", "README.md"],
   "scripts": {
-    "build:grammar": "peggy --format es -c pegconfig.json -o src/parser.js grammer.pegjs",
-    "build": "npm run build:grammar && tsc",
+    "build:grammar": "peggy --format commonjs -c pegconfig.json -o src/parser.js grammer.pegjs",
+    "build": "npm run build:grammar && tsc && cp src/parser.js src/parser.d.ts dist/",
+    "prepare": "npm run build",
     "test": "ts-node --project tsconfig.test.json test/run.ts",
     "test:types": "tsc --project tsconfig.test.json --noEmit"
   },
