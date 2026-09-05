@@ -389,11 +389,14 @@ describe("Constant folding (rules.ts, \"fold:unary:-\")", () =>
         `, 1)
     })
 
+    // A trap code is an ordinary core immediate, so it coerces to a u32
+    // (rtl.ts's `asImm`) exactly as `NEG` would have left it at runtime —
+    // a bare -1 is one `encodeJitProgram` cannot put on the wire.
     test("negative literal as trap's compile-time-constant argument", () =>
     {
         const { ok, trapCode } = runDsl("trap(-1);")
         assert.equal(ok, false)
-        assert.equal(trapCode, -1)
+        assert.equal(trapCode, 0xffffffff)
     })
 })
 

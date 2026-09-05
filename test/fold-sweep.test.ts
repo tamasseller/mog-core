@@ -85,9 +85,13 @@ describe("Constant folding — the unsigned half of a sign-sensitive operator", 
 
 describe("Constant folding — unary operator (rules.ts's \"fold:unary:-\")", () =>
 {
+    // The fold keeps -1; `trap`'s own immediate coerces it, as every core
+    // immediate does (rtl.ts's `asImm`) and as `NEG` itself would have left
+    // it at runtime. A bare -1 reached the encoder before, which reported it
+    // happily through the VM and could not put it on the wire at all.
     test("negation, as a compile-time constant", () =>
     {
-        assert.equal(trapCodeOf("trap(-1);"), -1)
+        assert.equal(trapCodeOf("trap(-1);"), 0xffffffff)
     })
 
     test("negation composes with a binary fold", () =>

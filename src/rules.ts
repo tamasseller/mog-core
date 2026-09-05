@@ -251,6 +251,11 @@ function leafRules(resolveLocal: (name: string) => number): Rule[]
 // folding for "/"/"%" (`BinaryOperator` has them but `OP_TABLE` doesn't —
 // there's no lowering for either yet at all, a separate, bigger gap).
 
+/** A folded constant keeps the value the arithmetic produced, sign and all:
+ *  a `pConst()` position may belong to an extension whose own operand is
+ *  signed (the codec extension's `seek` delta, encoded with `encodeSigned`),
+ *  and coercing here would settle that three layers before the wire. The
+ *  core's own immediates coerce where they are built instead (rtl.ts). */
 const literalOf = (value: number): Literal => ({type: "Literal", value, raw: String(value)})
 
 /** Mirrors vm.ts's own ALU-op semantics exactly (u32-wrapped inputs and,

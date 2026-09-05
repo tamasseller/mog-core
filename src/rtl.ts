@@ -274,8 +274,16 @@ export const PUSH = <E extends { ext: string } = ExtOpPayload>(): RtlInstr<E> =>
     ({ op: "PUSH" })
 
 /** `acc ← #imm` — load constant into accumulator. */
+/** A core immediate is a machine word, the same bits running the equivalent
+ *  instruction would have left (vm.ts wraps every ALU result to u32) and the
+ *  only thing `encodeLeb128` can put on the wire. Constant folding works in
+ *  plain arithmetic and may hand over a negative — coercing at the point the
+ *  value becomes an immediate keeps that out of the encoder without
+ *  deciding anything for an extension whose own operands are signed. */
+const asImm = (value: number): number => value >>> 0
+
 export const CONST = <E extends { ext: string } = ExtOpPayload>(imm: number): RtlInstr<E> =>
-    ({ op: "CONST", imm })
+    ({ op: "CONST", imm: asImm(imm) })
 
 /** `acc = acc ⟨op⟩ rN` — binary op with register operand, result → acc. */
 export const opReg = <E extends { ext: string } = ExtOpPayload>(op: BinaryOpcode, target: number): RtlInstr<E> =>
@@ -290,7 +298,7 @@ export const opRegWriteback = <E extends { ext: string } = ExtOpPayload>(op: Bin
 
 /** `acc = acc ⟨op⟩ #imm` — binary op with immediate operand, result → acc. */
 export const opImm = <E extends { ext: string } = ExtOpPayload>(op: BinaryOpcode, imm: number): RtlInstr<E> =>
-    ({ op, combo: "IMM_ACC", imm })
+    ({ op, combo: "IMM_ACC", imm: asImm(imm) })
 
 /** Stack-combo binary op (peek-writeback or pop). */
 export const opStack = <E extends { ext: string } = ExtOpPayload>(op: BinaryOpcode, combo: StackCombo): RtlInstr<E> =>
@@ -313,7 +321,7 @@ export const brTable = <E extends { ext: string } = ExtOpPayload>(n: number): Rt
 
 /** `TRAP #code` — abnormal exit with error code. */
 export const trap = <E extends { ext: string } = ExtOpPayload>(code: number): RtlInstr<E> =>
-    ({ op: "TRAP", imm: code })
+    ({ op: "TRAP", imm: asImm(code) })
 
 /** `CALL proc_idx` — invoke `procedure[calleeIndex]` (isa-core.md §4.6).
  *  Calling convention: the callee's *last* argument (if any) arrives in
