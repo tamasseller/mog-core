@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Whole-program validator (isa-core.md §8)
+ * mog-core/test — Whole-program validator (isa-core.md §8)
  *
  * Two kinds of coverage: the real pipeline (`ir`/`proc`/`lowerProgram`)
  * for the happy path and the tight stack-depth computation, and hand-

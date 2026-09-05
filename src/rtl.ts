@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — RTL instruction representation
+ * mog-core — RTL instruction representation
  *
  * Single source of truth for the lowered IR's instruction type. Consolidates
  * the former `RtlInstr` (east.ts), `ComboName`/`OutputLocation`/`Resource`

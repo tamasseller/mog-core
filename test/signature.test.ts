@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — procedure signatures
+ * mog-core/test — procedure signatures
  *
  * An `ir` fragment is a statement sequence, not a function definition, so a
  * signature has nowhere to live in the source text; it lives on `proc`

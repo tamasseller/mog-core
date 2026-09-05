@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Generic extension hook (ROADMAP.md item 6)
+ * mog-core/test — Generic extension hook (ROADMAP.md item 6)
  *
  * Exercises the `Extension` object threaded through every core stage using
  * a toy opcode, `double(x)` → `EXT DOUBLE_REG [regIndex]`: doubles a local

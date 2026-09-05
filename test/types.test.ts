@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Signed types, end to end
+ * mog-core/test — Signed types, end to end
  *
  * Every case runs the whole pipeline (source → types.ts → lowering → VM)
  * and is chosen so the signed and unsigned answers *differ* — a probe whose

@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Bytecode codec
+ * mog-core/test — Bytecode codec
  *
  * Two kinds of coverage:
  *  1. A literal, 128-entry table mirroring isa-core.md's Appendix — Opcode

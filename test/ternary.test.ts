@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — The conditional operator
+ * mog-core/test — The conditional operator
  *
  * A ternary is the only expression that lowers to a CFG split. One that is
  * the whole expression rides acc across the merge (isa-core.md §8.7,

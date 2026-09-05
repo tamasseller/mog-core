@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — vm.ts acc-clobbering enforcement (docs/design.md §16 item 2)
+ * mog-core/test — vm.ts acc-clobbering enforcement (docs/design.md §16 item 2)
  *
  * `raise.ts` already poisons its own tracked `acc` after a write-back-
  * in-place combo (REG_REG/PEEK_PEEK, rtl.ts's `COMBO` table); `run()`

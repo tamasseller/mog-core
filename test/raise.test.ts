@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Shakedown for raise.ts (ROADMAP.md item 12)
+ * mog-core/test — Shakedown for raise.ts (ROADMAP.md item 12)
  *
  * raise.ts had zero consumers and zero tests before this file — "sketched,
  * not verified" per the ROADMAP. This is a differential check, not a

@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Lowering ruleset
+ * mog-core — Lowering ruleset
  *
  * Rule table for the EAST pattern-rewrite lowerer. Each rule is a
  * (pattern, build) pair. The orchestrator tries every rule at every match

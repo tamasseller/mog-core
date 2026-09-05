@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Generic extension hook (ROADMAP.md item 6)
+ * mog-core — Generic extension hook (ROADMAP.md item 6)
  *
  * The generic core (rules.ts/lower.ts/validate.ts/vm.ts/bytecode.ts) never
  * hardcodes any domain-specific opcode. An `Extension` bundles everything a

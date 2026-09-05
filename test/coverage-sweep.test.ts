@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Rule-coverage sweep
+ * mog-core/test — Rule-coverage sweep
  *
  * Data-driven: for every binary operator in rules.ts's op table, probes
  * every addressing-combo shape (register, immediate, stack) in both

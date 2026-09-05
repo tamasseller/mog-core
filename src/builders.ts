@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Rule builder utilities
+ * mog-core — Rule builder utilities
  *
  * Small helpers for rule bodies: viability/ordering, SU scoring, and a
  * constructor for the RtlNode invariants (clobbers/tosDelta/maxStack). Rule

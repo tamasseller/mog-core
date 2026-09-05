@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Statement lowering pass
+ * mog-core — Statement lowering pass
  *
  * Converts a parsed AST fragment (Statement[]) into a ResolvedProc with
  * numerical register indices and flattened control flow: walk the

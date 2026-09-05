@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Whole-program static validator (isa-core.md §8)
+ * mog-core — Whole-program static validator (isa-core.md §8)
  *
  * Checks an assembled `RtlProgram` against isa-core.md §8's five static
  * guarantees — TOS balance (§8.1), call-graph acyclicity (§8.2), the

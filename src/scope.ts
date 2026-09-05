@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Lexical scope and register allocation
+ * mog-core — Lexical scope and register allocation
  *
  * One `RegAlloc` per DSL scope, mapping a name to the register index its
  * value lives in and to its declared type. Numbering is by TOS depth, so a

@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Type annotation pass
+ * mog-core — Type annotation pass
  *
  * Runs over one expression tree between parsing and tiling. It does two
  * things: stamp `signed` on the operators whose ISA opcode depends on it, 

@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Algorithm proofing / stress tests
+ * mog-core/test — Algorithm proofing / stress tests
  *
  * Rule coverage (coverage-sweep.test.ts) proves each *individual* rule
  * fires and produces correct isolated behavior, but says nothing about

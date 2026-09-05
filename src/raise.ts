@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Structured-form reconstruction ("raise")
+ * mog-core — Structured-form reconstruction ("raise")
  *
  * The inverse of lower.ts: turns a flat RtlProc.body back into a nested
  * statement/expression tree, so an AOT source backend (target-cpp,

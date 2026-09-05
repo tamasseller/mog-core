@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — what a procedure's `return`s add up to
+ * mog-core — what a procedure's `return`s add up to
  *
  * isa-core.md §8.7: a procedure returns a value on every path or on none,
  * and which one is *derived* rather than declared — nothing in §2.3's header

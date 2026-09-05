@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — What a failed lowering says
+ * mog-core/test — What a failed lowering says
  *
  * A rule that does not apply returns no candidate, so the tiler cannot
  * tell "this operator has no opcode" from "this name resolves to nothing"

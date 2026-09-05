@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Bytecode codec (isa-core.md §5, Appendix — Opcode
+ * mog-core — Bytecode codec (isa-core.md §5, Appendix — Opcode
  * Table)
  *
  * `encodeInstr`/`decodeInstr`/`encodeBody`/`decodeBody` handle one

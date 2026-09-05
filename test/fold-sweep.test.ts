@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Constant-folding rule-coverage sweep
+ * mog-core/test — Constant-folding rule-coverage sweep
  *
  * Data-driven, mirrors coverage-sweep.test.ts's approach but for rules.ts's
  * `fold:*` rules: one probe per operator, each verifying the folded value

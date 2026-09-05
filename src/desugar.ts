@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Desugaring, the expression pipeline's first phase
+ * mog-core — Desugaring, the expression pipeline's first phase
  *
  * Pure AST → AST, no scope and no instructions: the operators that are
  * defined in terms of other operators are rewritten into them here, so

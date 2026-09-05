@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Barrel re-exports.
+ * mog-core — Barrel re-exports.
  *
  * The generic, protocol-agnostic bytecode compiler and VM (isa-core.md):
  * IR authoring (`ir`/`proc` — `ir\`...\`` splices `Procedure`, `IrFragment`,

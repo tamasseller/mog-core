@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Expression lowering, everything after the lift
+ * mog-core — Expression lowering, everything after the lift
  *
  * `tileExpression` is the back half of the expression pipeline (desugar.ts
  * and lift.ts are the front, lower.ts's `lowerExpression` the caller):

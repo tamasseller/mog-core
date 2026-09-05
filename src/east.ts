@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Extended AST (EAST) node types
+ * mog-core — Extended AST (EAST) node types
  *
  * The EAST extends the parser's AST with **RTL-AST nodes** — architecture-aware
  * leaves produced by rule application. Internal nodes are EAST variants of the

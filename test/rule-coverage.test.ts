@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Lowering rule coverage gate
+ * mog-core/test — Lowering rule coverage gate
  *
  * Asserts every lowering rule (rules.ts) appeared in a node `lowerExpr`
  * actually selected as its winning tiling somewhere in the suite. Must run

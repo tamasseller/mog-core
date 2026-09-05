@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — EAST pattern matcher
+ * mog-core — EAST pattern matcher
  *
  * Tree-shaped pattern matching for the Extended AST, mirroring the
  * semantic-type matcher in `../matcher.ts`. A pattern is itself a tree;

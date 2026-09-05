@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Declarations, scopes, call arity and literals
+ * mog-core/test — Declarations, scopes, call arity and literals
  *
  * A register index comes from how far TOS has grown (isa-core.md §8.6), so
  * a name and a slot have to stay in step: every declaration pushes, and

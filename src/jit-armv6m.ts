@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — the jit-armv6m target's own wire wrapper.
+ * mog-core — the jit-armv6m target's own wire wrapper.
  *
  * A bare-metal JIT target needs two whole-program stats — `max_call_depth`,
  * `total_depth` — before it can compile a single instruction, to size its

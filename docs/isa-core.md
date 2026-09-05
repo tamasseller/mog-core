@@ -827,7 +827,7 @@ The DSL is a strict subset of C99; this section specifies only the delta
 from C, whose expression/statement grammar and precedence are inherited
 unchanged. The authoring entry point is a TypeScript tagged template,
 `` ir`<C-subset source>` ``, parsed by the PEG grammar at
-`packages/machine/grammer.pegjs` into an AST (`ast.ts`).
+`grammer.pegjs` into an AST (`ast.ts`).
 
 ### 10.2 Included
 

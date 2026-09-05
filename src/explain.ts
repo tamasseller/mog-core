@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Why a tiling failed
+ * mog-core — Why a tiling failed
  *
  * A rule that does not apply returns no candidate, so by the time the
  * tiler gives up, the reason is gone: an operator with no opcode, a name

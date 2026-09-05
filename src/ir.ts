@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — `ir\`...\`` tagged template literal
+ * mog-core — `ir\`...\`` tagged template literal
  *
  * The authoring entry point. Builds an {@link IrFragment} from a C-subset
  * source string (per isa-core.md Part VI) plus interpolated values, for

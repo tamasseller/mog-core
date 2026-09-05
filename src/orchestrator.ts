@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Expression tiling orchestrator (bottom-up memoized)
+ * mog-core — Expression tiling orchestrator (bottom-up memoized)
  *
  * Bottom-up rewrite search — see docs/isa-rationale.md for why pattern-rewrite
  * search is used instead of Sethi-Ullman. `tileNode` recursively computes

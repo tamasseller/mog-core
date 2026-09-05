@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — The operators that lower by being rewritten
+ * mog-core/test — The operators that lower by being rewritten
  *
  * desugar.ts turns compound assignment, `++`/`--`, `!`, unary `+` and
  * `&&`/`||` into the operators the tiler already knows; a postfix step

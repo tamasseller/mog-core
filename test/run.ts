@@ -1,5 +1,5 @@
 /**
- * Test entry point for @ppl/machine.
+ * Test entry point for mog-core.
  * Run via: npm test (from this package) or npm test (from root)
  */
 import "./grammar.test"

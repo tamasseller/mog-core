@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — `BR_TABLE` and `FALLTHROUGH`, at the ISA level
+ * mog-core/test — `BR_TABLE` and `FALLTHROUGH`, at the ISA level
  * (isa-core.md §4.5, §8.7)
  *
  * ternary.test.ts and switch.test.ts cover what the lowerer does with

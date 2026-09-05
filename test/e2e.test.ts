@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — End-to-end lowering + VM tests
+ * mog-core/test — End-to-end lowering + VM tests
  *
  * Each test: DSL source → parse → lower → VM execute → assert result.
  * Tests are "nontrivial but not complicated" — they verify the full

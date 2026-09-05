@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — Minimal Core VM
+ * mog-core — Minimal Core VM
  *
  * A single-pass, structured-control-flow interpreter — no pre-scan, no
  * precomputed jump table. A live control stack of "open blocks" tells

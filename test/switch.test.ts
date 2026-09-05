@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — `switch`, where a case label is a value
+ * mog-core/test — `switch`, where a case label is a value
  *
  * `BR_TABLE` indexes by the discriminant (isa-core.md §4.5), so a run of
  * consecutive labels maps onto it directly and anything else does not.

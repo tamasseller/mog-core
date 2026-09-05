@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Manual tiling performance probe
+ * mog-core/test — Manual tiling performance probe
  *
  * Not part of `npm test` (not imported by run.ts) — measures `tileExpr`'s
  * wall-clock cost on wide balanced-sum expression trees, the shape a

@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — Cost-optimal tiling tests
+ * mog-core/test — Cost-optimal tiling tests
  *
  * Tests `lowerExpr` directly: for each DSL expression, asserts the exact
  * instruction sequence its cost-optimal tiling produces. `tileNode`

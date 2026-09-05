@@ -1,5 +1,5 @@
 /**
- * @ppl/machine/test — do-while, bare blocks, and the slots `DROP` reclaims
+ * mog-core/test — do-while, bare blocks, and the slots `DROP` reclaims
  *
  * The three constructs the loop-order and `DROP` work added (isa-core.md
  * §4.4, §4.5, §7.2). A scope that ends where no `BLOCK_END` does is the

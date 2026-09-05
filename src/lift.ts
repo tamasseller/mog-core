@@ -1,5 +1,5 @@
 /**
- * @ppl/machine — The lift, the expression pipeline's second phase
+ * mog-core — The lift, the expression pipeline's second phase
  *
  * Two constructs cannot be tiled where they stand, because each needs a
  * register of its own to carry a value the tiler has no way to hold. Both

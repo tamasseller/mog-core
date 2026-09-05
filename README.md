@@ -1,4 +1,4 @@
-# @ppl/machine
+# mog-core
 
 The generic, protocol-agnostic bytecode compiler and VM: IR authoring,
 expression lowering, whole-program validation, execution, wire codec, and
@@ -36,8 +36,9 @@ notion of either.
 
 ## Companion
 
-[`packages/vscode-ir-syntax`](../vscode-ir-syntax) is a VS Code extension
-that syntax-highlights the C code inside `` ir`...` `` template literals.
+`vscode-ir-syntax`, in the protocol-projection-language workspace, is a VS
+Code extension that syntax-highlights the C code inside `` ir`...` ``
+template literals.
 
 ## Commands
 
