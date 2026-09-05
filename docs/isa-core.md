@@ -5,8 +5,8 @@
 > [applications.md](./applications.md). §11 specifies how a
 > domain extension plugs into the core: the opcode space it owns (§5.1),
 > and what it must declare about its own opcodes to keep §8's guarantees
-> intact. What a concrete extension's opcodes *do* is specified separately
-> (the codec extension: `docs/codec-extension.md`).
+> intact. What a concrete extension's opcodes *do* is that extension's own
+> spec, not this one's.
 
 ---
 
@@ -176,12 +176,12 @@ Rationale: 5-bit masking is what most targets do for free (x86 masks `CL`
 to five bits, AArch64 `LSLV` and RISC-V mask likewise, as does a JS `<<`),
 but ARMv6-M's register-form shift reads `Rm[7:0]`, and Thumb-1 has no
 AND-immediate — so guaranteeing the masked result there costs two extra
-instructions on every dynamic shift, to define a case no real codec
+instructions on every dynamic shift, to define a case no real program
 depends on. See jit-armv6m/docs/fuzzing-campaign.md finding 5.
 
-There is no `DIV`/`MOD`: division essentially never appears in codec
-arithmetic and many microcontrollers lack hardware support, so a program
-needing it calls a software helper procedure.
+There is no `DIV`/`MOD`: division essentially never appears in the
+arithmetic these fragments do and many microcontrollers lack hardware
+support, so a program needing it calls a software helper procedure.
 
 Five addressing combinations, identical across all ten ops:
 
@@ -483,8 +483,7 @@ their own sub-codes, the extended form covers `n ≥ 5` and nothing else, and
 
 Register indices are LEB128 in every instruction that carries one: one
 rule, no special case for small frames. `CALL`'s `proc_idx` is a plain
-unbounded LEB128 with no compact form, the same treatment `codec_idx` gets
-in `docs/codec-extension.md` §6.4, since a procedure-table index has no
+unbounded LEB128 with no compact form, since a procedure-table index has no
 small natural ceiling.
 
 ### 5.5 Program framing
@@ -514,11 +513,10 @@ terminator.
 
 `arg_count` is the only core-mandated wire-level header field. A
 procedure header's extension fields (§2.3, §11.4) are not wire-encoded:
-they are opaque to the core, and the one real consumer so far (the codec
-extension's `o0` `TypeNode`) is a build/validate-time value resolved before
-serialization. Persisting extension header data would take a symmetric
-`Extension.header` codec hook mirroring `Extension.codec`, added when a
-real need appears.
+they are opaque to the core, and the one real consumer so far is a
+build/validate-time value resolved before serialization. Persisting
+extension header data would take a symmetric `Extension.header` hook
+mirroring `Extension.codec`, added when a real need appears.
 
 Nothing here is self-delimiting from the outside, and nothing here binds a
 program to the validator that produced it. Both are a target's own concern —
@@ -920,8 +918,8 @@ extend is inserted implicitly wherever a value lands in a narrow variable.
 
 `trap` is a function rather than a keyword so `return` stays the only
 procedure-exit keyword. Resolving any other call name (procedure table
-entries, extension ops, codec invocations) is an application-layer
-mechanism, out of scope here.
+entries, extension ops) is an application-layer mechanism, out of scope
+here.
 
 ### 10.6 Lowering rules
 

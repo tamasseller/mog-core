@@ -78,11 +78,12 @@ adjacent in the table. The alternative is duplicating the body, which is a
 size decision, not an encoding one.
 
 **`TRAP` is one generic opcode, not a per-domain family.** Any consumer of
-this ISA needs a way to stop and report a reason: a codec validating a
-checksum, a filter rejecting malformed input, anything built on top. The
-reasons are domain-specific, the action (stop, report a code, let the host
-decide) is not, and encoding abort as a degenerate loop or jump-to-nowhere
-would break the structured-control-flow invariant for no gain. So
+this ISA needs a way to stop and report a reason: a probe sequence seeing
+an unexpected response, a filter rejecting malformed input, anything built
+on top. The reasons are domain-specific, the action (stop, report a code,
+let the host decide) is not, and encoding abort as a degenerate loop or
+jump-to-nowhere would break the structured-control-flow invariant for no
+gain. So
 `TRAP #code` lives in the core with an error-code space partitioned by
 convention (`0` reserved, rest host-defined) rather than by ISA-enforced
 semantics: the host owns all stream cleanup and handle teardown and decides
@@ -202,10 +203,11 @@ single-byte and the lowerer's cost model never has to know which ops are
 expensive to select.
 
 The unary class is the one place a split is actually measured rather than
-guessed: `CLZ` and `REVBITS` appear in no benchmark workload and in no
-codec, while `NEG`, `NOT` and the four extend ops are on ordinary
-expression paths. That is a frequency claim with evidence behind it, so
-those two sit behind §5.3's `MISC_UNARY` escape and the other six do not.
+guessed: `CLZ` and `REVBITS` appear in no benchmark workload and in none
+of the domain corpora, while `NEG`, `NOT` and the four extend ops are on
+ordinary expression paths. That is a frequency claim with evidence behind
+it, so those two sit behind §5.3's `MISC_UNARY` escape and the other six do
+not.
 
 **Arithmetic's immediate operand has no small form; comparison's does.**
 The right constant to special-case for `ADD` is not the right one for
@@ -275,9 +277,9 @@ push-then-pop stack bridge in between.
 
 **No `DIV`/`MOD`.** Many microcontrollers lack hardware division, and
 including software-emulated division would silently emit expensive loops
-on those targets. Codec arithmetic is dominated by shifts, masks, adds and
-compares; modulo by a power of two is `AND (N−1)`. A program that genuinely
-needs division calls a software helper procedure.
+on those targets. Fragment arithmetic is dominated by shifts, masks, adds
+and compares; modulo by a power of two is `AND (N−1)`. A program that
+genuinely needs division calls a software helper procedure.
 
 ---
 

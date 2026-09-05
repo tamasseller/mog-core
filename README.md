@@ -1,13 +1,15 @@
 # mog-core
 
-The generic, protocol-agnostic bytecode compiler and VM: IR authoring,
-expression lowering, whole-program validation, execution, wire codec, and
-the extension hook a domain uses to add its own opcodes.
+The generic, domain-agnostic bytecode compiler and VM: IR authoring,
+expression lowering, whole-program validation, execution, wire encoding,
+and the extension hook a domain uses to add its own opcodes.
 
-Nothing here knows what a codec is. Everything domain-specific lives in a
-registered `Extension` (`src/extension.ts`), which is how `@ppl/codecs`
-adds stream I/O and object-handle opcodes without this package growing a
-notion of either.
+The core knows arithmetic, control flow and program state, and nothing
+about any application domain. Everything that touches an environment — the
+opcodes, their DSL surface, their execution and their wire form — arrives
+as a registered `Extension` (`src/extension.ts`), so the core stays
+ignorant of what those opcodes mean while still proving every static
+guarantee over programs that use them.
 
 ## Docs
 
@@ -16,6 +18,8 @@ notion of either.
   validation, the `ir` textual DSL, extension mechanism, full opcode table.
 - [docs/isa-rationale.md](docs/isa-rationale.md): why the non-obvious
   choices in the spec are what they are.
+- [docs/applications.md](docs/applications.md): what the machine is for,
+  and what that constrains.
 
 ## Layout
 
@@ -32,7 +36,7 @@ notion of either.
 | `src/validate.ts` | isa-core.md §8's whole-program checks, plus the stack-depth and call-depth bounds |
 | `src/vm.ts` | reference interpreter |
 | `src/bytecode.ts`, `src/encoding.ts` | procedure and program wire encoding (isa-core.md §5) |
-| `src/extension.ts` | the `Extension` interface: per-opcode effect, DSL resolution, execution, wire codec |
+| `src/extension.ts` | the `Extension` interface: per-opcode effect, DSL resolution, execution, wire encode/decode |
 
 ## Companion
 
