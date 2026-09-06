@@ -146,11 +146,13 @@ AssignmentExpression
     }
   / ConditionalExpression
 
+// Optional tail, not an ordered choice: a choice re-parses the operand when
+// no "?" follows, which compounds to 2x per level of expression nesting.
 ConditionalExpression
-  = test:LogicalORExpression _ "?" _ consequent:Expression _ ":" _ alternate:AssignmentExpression {
-      return { type: "ConditionalExpression", test, consequent, alternate };
+  = test:LogicalORExpression rest:(_ "?" _ c:Expression _ ":" _ a:AssignmentExpression { return { c, a }; })? {
+      return rest === null ? test
+        : { type: "ConditionalExpression", test, consequent: rest.c, alternate: rest.a };
     }
-  / LogicalORExpression
 
 LogicalORExpression
   = head:LogicalANDExpression tail:(_ op:"||" _ right:LogicalANDExpression { return { logical: true, op, right }; })* {
@@ -209,11 +211,14 @@ PrefixExpression
     }
   / PostfixExpression
 
+// Optional tail for the same reason as ConditionalExpression: an ordered
+// choice here re-parses the whole PrimaryExpression, including a parenthesised
+// subexpression.
 PostfixExpression
-  = argument:PrimaryExpression _ operator:("++" / "--") {
-      return { type: "UpdateExpression", operator, argument, prefix: false };
+  = argument:PrimaryExpression operator:(_ o:("++" / "--") { return o; })? {
+      return operator === null ? argument
+        : { type: "UpdateExpression", operator, argument, prefix: false };
     }
-  / PrimaryExpression
 
 // Excludes things that can't be assigned to (like function calls or numbers)
 LeftHandSideExpression

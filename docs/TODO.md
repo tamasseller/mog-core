@@ -21,11 +21,22 @@ in the expression. `UnspecifiedShiftAmount` moved to `rtl.ts` beside
 because a 5-byte LEB128 immediate loses to three short instructions on
 cost. `a - 0xffffffe1` is `a + 31`. Codegen quality, not correctness.
 
-**Replace the generated parser with a hand-written one.** Parse time under
-peggy is roughly 2x per level of expression nesting and near-independent of
-length: measured over 2087 bodies, height 4 at 96 chars parses in 0.37ms,
-height 13 at 592 chars in 744ms. That is backtracking through the
-precedence cascade, so it is a shape cost, not a constant factor. A
-tokenizer plus precedence-climbing recursive descent is linear. It also caps
-what mog-jit's fuzzer can generate — `MAX_EXPR_HEIGHT` is 8 because of
-this. Not currently blocking: the fuzzer stopped parsing per candidate.
+**Replace the generated parser with a hand-written one.** No longer a
+performance item — see below. What is left is that `build:grammar` is a
+build step, `src/parser.js` is 98KB of generated code carried in git, and
+peggy is a devDependency. Against that, a tokenizer plus precedence-climbing
+recursive descent has to carry its own diagnostics: peggy's "Expected X but
+found Y" is free today, and `mog-jit/fuzz/ts/invalid.ts` classifies refusals
+on that text.
+
+Related, and now closed: parse time was exponential in expression nesting,
+recorded here as roughly 2x per level and read as backtracking through the
+precedence cascade — a property of PEG parsing. It was not. Two rules were
+written as ordered choices whose first alternative consumed the operand
+before failing, so each parsed its operand twice whenever the tail was
+absent: `ConditionalExpression` with no `?`, and `PostfixExpression` with no
+`++`/`--`, the latter over a whole parenthesised subexpression. Two
+independent doublings compose, so the real cost was 4x per level. Both are
+an optional tail now. Height 10 went 14359ms to 0.36ms and `test/bench.ts`
+at n=64 went parse=2049ms to 2.5ms, with byte-identical ASTs; tiling is the
+dominant cost again, as that file always said it should be.
