@@ -6,7 +6,7 @@ import assert from "node:assert/strict"
 
 import {
     encodeJitEnvelope, decodeJitEnvelope, encodeJitProgram, decodeJitProgram,
-    programFrameHash, PROGRAM_FRAME_BYTES, PROGRAM_CONTRACT_VERSION,
+    programFrameHash, PROGRAM_FRAME_BYTES, PROGRAM_CONTRACT_VERSION, ARMV6M_PROFILE,
 } from "../src/jit-armv6m"
 import { encodeProgram, encodeLeb128 } from "../src/bytecode"
 import { bare, call, opImm, LOAD, CONST } from "../src/rtl"
@@ -136,5 +136,32 @@ describe("jit-armv6m program frame (design.md §1.1)", () =>
 
         assert.deepEqual(decoded.program, program)
         assert.equal(decoded.next, encodeJitEnvelope(program).length)
+    })
+})
+
+describe("jit-armv6m target profile (profile.ts)", () =>
+{
+    // Deep enough that `Window::discard`'s single `ADD sp,#imm7` could not
+    // encode the reclaim. The target asserts on it rather than bailing, so
+    // this refusal is the only thing standing between the two.
+    const tooDeep: RtlProgram = { procedures: [{ argCount: 132, body: [bare("RETURN")] }] }
+
+    test("the envelope refuses a program outside the profile", () =>
+    {
+        assert.throws(() => encodeJitEnvelope(tooDeep), /localPeak 132 exceeds the armv6m profile's maxLocalDepth of 131/)
+        assert.throws(() => encodeJitProgram(tooDeep), /localPeak 132 exceeds the armv6m profile's maxLocalDepth of 131/)
+    })
+
+    test("one argument shallower encodes", () =>
+    {
+        encodeJitProgram({ procedures: [{ argCount: 131, body: [bare("RETURN")] }] })
+    })
+
+    test("a caller may supply a narrower profile of its own", () =>
+    {
+        const program: RtlProgram = { procedures: [{ argCount: 0, body: [CONST(5), bare("RETURN")] }] }
+        encodeJitProgram(program, undefined, ARMV6M_PROFILE)
+        assert.throws(() => encodeJitProgram(program, undefined, { name: "tiny", maxBodyBytes: 1 }),
+            /bodyBytes 2 exceeds the tiny profile's maxBodyBytes of 1/)
     })
 })

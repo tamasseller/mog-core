@@ -17,6 +17,8 @@
  */
 import { encodeLeb128, decodeLeb128, encodeProgram, decodeProgram } from "./bytecode"
 import { validateProgram } from "./validate"
+import { assertProfile } from "./profile"
+import type { TargetProfile } from "./profile"
 import type { RtlProgram, ExtOpPayload } from "./rtl"
 import type { Extension } from "./extension"
 
@@ -28,6 +30,22 @@ export const PROGRAM_CONTRACT_VERSION = 3
 export const PROGRAM_FRAME_BYTES = 2
 
 const FRAME_SEED = (0x811c9dc5 ^ PROGRAM_CONTRACT_VERSION) >>> 0
+
+/** What this target can encode, as opposed to what the ISA allows
+ *  (profile.ts). Every number mirrors a C++ constant; a violation is an
+ *  error here so it need not be a `RESOURCE_LIMIT_*` bail there. */
+export const ARMV6M_PROFILE: TargetProfile = {
+    name: "armv6m",
+    /** mog-jit `compiler/emit/abi_strategy.h`'s `MAX_PROC_IDX` + 1. */
+    maxProcCount: 0x8000,
+    /** mog-jit `runtime/dispatch_table.h`'s `ProcSlot::MAX_ARG_COUNT`. */
+    maxArgCount: (1 << 11) - 1,
+    /** Ditto, `ProcSlot::MAX_BODY_BYTES`. */
+    maxBodyBytes: (1 << 20) - 1,
+    /** `WINDOW_SIZE` plus what one `ADD sp,#imm7` reclaims: 4 + 508/4.
+     *  `Window::discard`/`restore` and `spillImm` all sit under it. */
+    maxLocalDepth: 4 + 127,
+}
 
 /** FNV-1a folded rather than truncated: the prime is odd, so bit 0 survives
  *  every multiply and the raw low half is little more than a parity. */
@@ -44,10 +62,16 @@ export function programFrameHash(bytes: Uint8Array, len: number = bytes.length):
 
 /** Prepend `max_call_depth`/`total_depth` (`validateProgram`) to an ordinary
  *  `encodeProgram` blob. Unframed — the fuzz corpus is raw mutation fodder and
- *  the oracle's own length gates are stated against this shape. */
-export function encodeJitEnvelope<E extends { ext: string } = ExtOpPayload>(program: RtlProgram<E>, extension?: Extension<E>): Uint8Array
+ *  the oracle's own length gates are stated against this shape.
+ *
+ *  Also where the profile is checked, so both shapes carry it: nothing reaches
+ *  the target another way, which is what lets the target stop checking what
+ *  this already did (design.md §12). */
+export function encodeJitEnvelope<E extends { ext: string } = ExtOpPayload>(program: RtlProgram<E>, extension?: Extension<E>, profile: TargetProfile = ARMV6M_PROFILE): Uint8Array
 {
-    const { maxCallDepth, totalDepth } = validateProgram(program, extension)
+    const stats = validateProgram(program, extension)
+    assertProfile(program, stats, profile, extension)
+    const { maxCallDepth, totalDepth } = stats
     return Uint8Array.from([
         ...encodeLeb128(maxCallDepth),
         ...encodeLeb128(totalDepth),
@@ -69,9 +93,9 @@ export function decodeJitEnvelope<E extends { ext: string } = ExtOpPayload>(byte
 
 /** The envelope plus its frame — the one real production path for a flashable
  *  jit-armv6m image, and the only shape `Executor::run` accepts. */
-export function encodeJitProgram<E extends { ext: string } = ExtOpPayload>(program: RtlProgram<E>, extension?: Extension<E>): Uint8Array
+export function encodeJitProgram<E extends { ext: string } = ExtOpPayload>(program: RtlProgram<E>, extension?: Extension<E>, profile: TargetProfile = ARMV6M_PROFILE): Uint8Array
 {
-    const payload = encodeJitEnvelope(program, extension)
+    const payload = encodeJitEnvelope(program, extension, profile)
     const framed = new Uint8Array(payload.length + PROGRAM_FRAME_BYTES)
     framed.set(payload)
 

@@ -7,8 +7,9 @@
  * independently never needs a separate concatenation helper), the AST/EAST
  * layers, the pattern-rewrite lowering ruleset and orchestrator, the RTL
  * instruction set, the lowerer, the whole-program validator, the VM, the
- * wire codec, and the generic extension hook. Plus one per-target
- * wrapper, `jit-armv6m`, which is the only target-specific module here.
+ * wire codec, the generic extension hook, and the target-profile carrier.
+ * Plus one per-target wrapper, `jit-armv6m`, which is the only
+ * target-specific module here.
  */
 export * from "./ast"
 export * from "./east"
@@ -19,6 +20,7 @@ export * from "./rtl"
 export * from "./rules"
 export * from "./lower"
 export * from "./validate"
+export * from "./profile"
 export * from "./vm"
 export * from "./bytecode"
 export * from "./jit-armv6m"
