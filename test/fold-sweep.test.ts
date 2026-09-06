@@ -16,6 +16,7 @@ import { ir } from "../src/ir"
 import { lowerProc } from "../src/lower"
 import { run } from "../src/vm"
 import type { RtlProgram } from "../src/rtl"
+import { UnspecifiedShiftAmount } from "../src/rtl"
 
 function trapCodeOf(source: string): number | null
 {
@@ -54,6 +55,35 @@ describe("Constant folding — binary operators (rules.ts's \"fold:binary:*\")",
             assert.equal(trapCodeOf(`trap(${a} ${ast} ${b});`), expect)
         })
     }
+})
+
+describe("Constant folding — §4.1's shift range", () =>
+{
+    // The fold used to mask the amount to five bits the way JS does, while
+    // vm.ts threw and validate.ts rejected the immediate form. That made the
+    // answer depend on where the shift sat: a whole-expression shift lowers
+    // to a real instruction the validator catches, but one feeding an
+    // immediate position folds, and `1 << 32` quietly became `1 << 0`.
+    for(const src of ["1 << 32", "1 << 33", "16 >> 32", "0xffffffff >> 40"])
+    {
+        test(`${src} does not fold to anything`, () =>
+        {
+            assert.throws(() => trapCodeOf(`trap((${src}) + 0);`), UnspecifiedShiftAmount)
+        })
+    }
+
+    test("the same shift is refused in every position it can take", () =>
+    {
+        // Nested — the position that used to fold — and bare, which lowers
+        // to a real SHL the validator rejects. Both must refuse.
+        assert.throws(() => trapCodeOf(`trap(5 + (1 << 32));`), UnspecifiedShiftAmount)
+        assert.throws(() => trapCodeOf(`trap(1 << 32);`), /shift amount outside 0..31|unspecified result/)
+    })
+
+    test("31 still folds", () =>
+    {
+        assert.equal(trapCodeOf(`trap((1 << 31) + 0);`), 0x80000000)
+    })
 })
 
 /* Both operands above are small, so both are `i32` and every fold picks the

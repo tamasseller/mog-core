@@ -37,7 +37,7 @@ import type {BinaryOperator, Literal, UnaryOperator} from "./ast"
 import type {EastPattern, MatchOf, CallPattern} from "./matcher"
 import {pLiteral, pConst, pIdentifier, pRtl, pBinary, pUnary, pAssign, pCall, pBuiltinCall} from "./matcher"
 import type {ComboName, OutputLocation, Resource, RtlInstr, BinaryOpcode, UnaryOpcode, StackCombo, ExtOpPayload} from "./rtl"
-import {CONST, PUSH, LOAD, STORE, opReg, opRegWriteback, opImm, opStack, bare, call, trap, outputHas} from "./rtl"
+import {CONST, PUSH, LOAD, STORE, opReg, opRegWriteback, opImm, opStack, bare, call, trap, outputHas, UnspecifiedShiftAmount} from "./rtl"
 import type {EastExpression, RtlNode} from "./east"
 import {nodeInvariants, pickBinaryOrder} from "./builders"
 import type {Extension} from "./extension"
@@ -260,13 +260,24 @@ const literalOf = (value: number): Literal => ({type: "Literal", value, raw: Str
 
 /** Mirrors vm.ts's own ALU-op semantics exactly (u32-wrapped inputs and,
  *  for arithmetic/shift ops, output) so a folded constant is bit-identical
- *  to what running the equivalent instruction would have produced. Only
+ *  to what running the equivalent instruction would have produced —
+ *  including refusing to produce one at all where the VM would. Only
  *  ever called with an `op` that's actually a key of `OP_TABLE` (below),
  *  so the two operators `BinaryOperator` has but `OP_TABLE` doesn't
  *  ("/", "%") never reach here. */
 function foldBinaryOp(op: BinaryOperator, a: number, b: number, signed: boolean): number
 {
     const L = a >>> 0, R = b >>> 0
+
+    // isa-core.md §4.1 defines 0..31 and nothing else, so there is no value
+    // to fold to. vm.ts refuses the same amount at run time and validate.ts
+    // refuses it as an immediate; without this the answer would depend on
+    // where in the expression the shift sat — whole-expression shifts lower
+    // to a real instruction the validator catches, while a subexpression
+    // folds here, and JS's own 5-bit mask would quietly make `x << 32` mean
+    // `x << 0`.
+    if((op === "<<" || op === ">>") && R > 31)
+        throw new UnspecifiedShiftAmount(op === "<<" ? "SHL" : signed ? "ASR" : "SHR", R, "constant folding will not invent one")
     if(signed)
     {
         // The five sign-sensitive operators, folded the way their signed

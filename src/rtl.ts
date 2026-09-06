@@ -101,6 +101,36 @@ export const COMPARISON_OPS: ReadonlySet<BinaryOpcode> = new Set([
  *  dynamic one). */
 export const SHIFT_OPS: ReadonlySet<BinaryOpcode> = new Set(["SHL", "SHR", "ASR"])
 
+/** isa-core.md §4.1 defines a shift amount of `0..31` and nothing else. A
+ *  *deployed* projection does not refuse the rest — it cannot: an ARM target
+ *  shifts by `Rm[7:0]`, a JS backend masks to five bits, and each carries on
+ *  with whatever that produced. Refusing is what the toolchain does on their
+ *  behalf, at three moments: `validate.ts` on an immediate operand,
+ *  `rules.ts` where constant folding would otherwise have picked one host's
+ *  answer, and `vm.ts` on an amount only run time knows. `refusal` names
+ *  which, since what a caller can do about it differs — the first two reject
+ *  the program before any target sees it, the third stops an excursion the
+ *  program was entitled to make.
+ *
+ *  Its own type, and emphatically *not* a `Trap`. Both stop execution, so
+ *  that is not the difference; what a consumer does with the outcome is. A
+ *  trap is a program-level event with a code every projection must *agree*
+ *  on. This says the opposite — that there is nothing here to compare, since
+ *  each projection would answer differently and none would be wrong. A
+ *  differential harness reads two refusals as agreement, and one refusal
+ *  against an answer as a real disagreement (mog-jit `fuzz/ts/driver.ts`).
+ *  Malformed IR still throws a plain `Error`: a *dynamic* out-of-range
+ *  amount is a legal program, just one whose result no projection owes
+ *  another. */
+export class UnspecifiedShiftAmount extends Error
+{
+    constructor(readonly op: string, readonly amount: number, refusal = "nothing here will invent one")
+    {
+        super(`${op} by ${amount >>> 0}: shift amounts outside 0..31 have an unspecified result (isa-core.md §4.1) — ${refusal}`)
+        this.name = "UnspecifiedShiftAmount"
+    }
+}
+
 /** Unary ALU opcodes — operate on acc in place, no combo (§4.3). */
 export type UnaryOpcode =
     | "NEG" | "NOT" | "CLZ" | "REVBITS"

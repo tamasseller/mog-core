@@ -30,7 +30,7 @@
 
 import assert from "assert"
 import type {RtlProgram, RtlProc, RtlInstr, ExtOpPayload} from "./rtl"
-import {isLoopOpcode} from "./rtl"
+import {isLoopOpcode, UnspecifiedShiftAmount} from "./rtl"
 import type {Extension, ExtOpEffect} from "./extension"
 import {accOutOf} from "./extension"
 
@@ -71,28 +71,6 @@ export class StepLimitExceeded extends Error
     }
 }
 
-/** A shift whose amount is outside `0..31`, where isa-core.md §4.1 leaves
- *  the result unspecified.
- *
- *  Its own type, and emphatically *not* a `Trap`: a trap is a program-level
- *  event with a code that every projection must agree on, and no projection
- *  will ever raise this one — the ARM backend just lets the hardware shift
- *  by `Rm[7:0]`, a JS backend lets `<<` mask to five bits. This is the
- *  oracle refusing to invent an answer, so that a differential harness sees
- *  "there is nothing to compare here" rather than a manufactured mismatch
- *  against whichever value this VM happened to pick. Malformed IR still
- *  throws a plain `Error`: an out-of-range *dynamic* amount is a legal
- *  program, just one whose result no projection owes another. The
- *  compile-time half of the class never reaches here at all — validate.ts
- *  rejects an out-of-range immediate amount outright. */
-export class UnspecifiedShiftAmount extends Error
-{
-    constructor(readonly op: string, readonly amount: number)
-    {
-        super(`${op} by ${amount >>> 0}: shift amounts outside 0..31 have an unspecified result (isa-core.md §4.1) — this VM will not invent one`)
-        this.name = "UnspecifiedShiftAmount"
-    }
-}
 
 /** Exported for reuse by raise.ts's own test suite (a differential check
  *  against this exact opcode semantics, not a second hand-copied
@@ -115,7 +93,7 @@ export function evalBinary(L: number, R: number, op: RtlInstr["op"]): number
         // amount arrives as a large unsigned one and is rejected the same
         // way.
         case "SHL": case "SHR": case "ASR":
-            if((R >>> 0) > 31) throw new UnspecifiedShiftAmount(op, R)
+            if((R >>> 0) > 31) throw new UnspecifiedShiftAmount(op, R, "this VM will not invent one")
             return op === "SHL" ? (L << (R & 31)) >>> 0
                  : op === "SHR" ? L >>> (R & 31)
                  :                (L >> (R & 31)) >>> 0

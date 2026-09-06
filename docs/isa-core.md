@@ -162,15 +162,16 @@ still produces some value, traps nothing, touches no other state, and
 never licenses a projection to reason backwards about what the amount
 could have been. Which value it is varies by projection — a projection
 lowering to a host `<<` gets the host's own masking, one lowering to
-ARMv6-M's register-form shift gets `Rm[7:0]`, and a constant-folded shift
-may differ from the same shift performed at run time. A program that must
-work for an unbounded amount masks it itself (`AND #31`).
+ARMv6-M's register-form shift gets `Rm[7:0]`. A program that must work for
+an unbounded amount masks it itself (`AND #31`).
 
-The immediate combo carries the amount as a literal, so the whole
-compile-time half of that class is a validator error rather than a silent
-divergence: `SHL`/`SHR`/`ASR` in the immediate combo require `0 <= imm <=
-31`. Only the register, peek and pop combos can reach the unspecified
-case.
+Whenever the amount is known before the program runs, the toolchain refuses
+rather than choosing: `SHL`/`SHR`/`ASR` in the immediate combo require
+`0 <= imm <= 31`, and constant folding of a source-level shift refuses to
+produce a value for any other amount instead of adopting the folding host's
+masking. Both raise `UnspecifiedShiftAmount`. So the whole compile-time half
+of that class is an error rather than a silent divergence, and only the
+register, peek and pop combos can reach the unspecified case at all.
 
 Rationale: 5-bit masking is what most targets do for free (x86 masks `CL`
 to five bits, AArch64 `LSLV` and RISC-V mask likewise, as does a JS `<<`),

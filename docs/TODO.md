@@ -10,6 +10,12 @@ immediate combo with a negative value — the core's immediates coerce now
 (rtl.ts's `asImm`), the gate is unchanged. Settling the legal range per
 immediate kind is a contract change, not a bug fix.
 
+Related, and now closed: `foldBinaryOp` used to mask a shift amount to five
+bits the way JS does, so §4.1's `0..31` was enforced by `validate.ts` and
+`vm.ts` but not by folding — making the answer depend on where the shift sat
+in the expression. `UnspecifiedShiftAmount` moved to `rtl.ts` beside
+`SHIFT_OPS`, and all three sites throw it.
+
 **No fold turns a subtraction of a large constant into an addition.**
 `a - -31` folds to `a - 0xffffffe1` and lowers to `CONST 31; NEG; RSUB`,
 because a 5-byte LEB128 immediate loses to three short instructions on

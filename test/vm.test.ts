@@ -14,7 +14,8 @@
 import { describe, test } from "node:test"
 import assert from "node:assert/strict"
 
-import { run, evalBinary, evalUnary, UnspecifiedShiftAmount } from "../src/vm"
+import { run, evalBinary, evalUnary } from "../src/vm"
+import { UnspecifiedShiftAmount } from "../src/rtl"
 import { bare, brTable, call, CONST, PUSH, LOAD, STORE, opImm, opStack, opRegWriteback } from "../src/rtl"
 import type { RtlProgram } from "../src/rtl"
 
