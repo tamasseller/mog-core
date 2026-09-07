@@ -23,7 +23,7 @@ import type {Expression, ConditionalExpression, UpdateExpression, Identifier} fr
 import {recurseOver, mapOver} from "./ast"
 import type {PrimType} from "./ast"
 import type {ExtOpPayload, RtlInstr} from "./rtl"
-import {bare, brTable, PUSH, STORE} from "./rtl"
+import {bare, brTable, opImm, PUSH, STORE} from "./rtl"
 import {RegAlloc} from "./scope"
 import {tileExpression, isTrapCall, neverProduces} from "./expr"
 import {typeOfExpr} from "./types"
@@ -49,7 +49,7 @@ export function lift<E extends { ext: string } = ExtOpPayload>(expr: Expression,
 /** A prefix `++`/`--` never reaches here — desugar.ts rewrites it, as it
  *  does a postfix one whose value is discarded. What is left is a postfix
  *  step someone reads. */
-function needsLift(e: Expression): boolean
+export function needsLift(e: Expression): boolean
 {
     return e.type === "ConditionalExpression"
         || (e.type === "UpdateExpression" && !e.prefix)
@@ -68,20 +68,52 @@ function hoist<E extends { ext: string } = ExtOpPayload>(e: Expression, alloc: R
     }
 }
 
+/** `PUSH` reads acc without disturbing it, so the pre-step value is still
+ *  there once the slot holds it: the step is `acc ± 1` written straight
+ *  back, reaching `a` neither for the operand nor for a second constant.
+ *  Undefined where that would drop a narrowing cast — a narrow target keeps
+ *  the tiled assignment, which is where the cast comes from. */
+function stepInPlace<E extends { ext: string } = ExtOpPayload>(e: UpdateExpression, alloc: RegAlloc<E>): RtlInstr<E>[] | undefined
+{
+    if(e.argument.type !== "Identifier") return undefined
+
+    const slot = alloc.resolve(e.argument.name)
+    const type = typeOfExpr(e.argument, alloc)
+
+    if(slot === undefined || (type !== "u32" && type !== "i32")) return undefined
+
+    return [opImm<E>(e.operator === "++" ? "ADD" : "SUB", 1), STORE<E>(slot)]
+}
+
+/** The pre-step value where the consumer wants it on the stack: the slot
+ *  `PUSH` already reserved is the result, so nothing is loaded back and
+ *  there is nothing to reclaim. Undefined where `stepInPlace` is. */
+export function postfixToTos<E extends { ext: string } = ExtOpPayload>(e: UpdateExpression, alloc: RegAlloc<E>): RtlInstr<E>[] | undefined
+{
+    const step = stepInPlace(e, alloc)
+    if(!step) return undefined
+
+    const before = tileExpression(e.argument, alloc, {demand: "tos", what: `operand of postfix ${e.operator}`})
+    return [...before.fragment, ...step]
+}
+
 function hoistPostfixStep<E extends { ext: string } = ExtOpPayload>(e: UpdateExpression, alloc: RegAlloc<E>, out: RtlInstr<E>[]): Identifier
 {
     // `LOAD a | PUSH`: the slot is reserved and holds the pre-step value,
     // one instruction each, before `a` is touched.
     const before = tileExpression(e.argument, alloc, {demand: "tos", what: `operand of postfix ${e.operator}`})
 
+    const inPlace = stepInPlace(e, alloc)
+
     const name = `?${alloc.depth}`
     alloc.alloc(name, typeOfExpr(e.argument, alloc))
 
     // `desugar(e, false)` is this same step with its value discarded —
     // exactly the assignment to emit, now that the old value is kept.
-    const step = tileExpression(desugar(e, false), alloc, {demand: "statement", what: `postfix ${e.operator}`})
+    const step = inPlace
+        ?? tileExpression(desugar(e, false), alloc, {demand: "statement", what: `postfix ${e.operator}`}).fragment
 
-    out.push(...before.fragment, ...step.fragment)
+    out.push(...before.fragment, ...step)
     return {type: "Identifier", name}
 }
 

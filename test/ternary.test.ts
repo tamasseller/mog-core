@@ -261,6 +261,9 @@ describe("ternary — as an assignment's right-hand side", () =>
             "CONST #1", "PUSH", "CONST #0", "PUSH",
             "LOAD 0", "PUSH", "BR_TABLE 1", "CONST #20", "STORE 2", "BLOCK_END", "CONST #10", "STORE 2", "BLOCK_END",
             "CONST #1", "ADD 2", "STORE 1",
+            // The lifted slot is dead once the consumer has read it, so it
+            // is reclaimed here rather than at the enclosing BLOCK_END.
+            "DROP #1",
             "LOAD 1", "RETURN",
         ]))
 })

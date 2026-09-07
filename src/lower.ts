@@ -26,7 +26,7 @@ import {RegAlloc} from "./scope"
 import {desugar} from "./desugar"
 import {returnsValue} from "./signature"
 import type {ProcSignature} from "./types"
-import {lift, conditionalToAcc, assignedConditionalToAcc} from "./lift"
+import {lift, needsLift, postfixToTos, conditionalToAcc, assignedConditionalToAcc} from "./lift"
 import {tileExpression} from "./expr"
 import type {TileRequest} from "./expr"
 import type {Extension} from "./extension"
@@ -64,10 +64,35 @@ function lowerExpression<E extends { ext: string } = ExtOpPayload>(expr: Express
             : {fragment: inAcc, tosDelta: 0}
     }
 
-    const lifted = lift(sugared, scope)
-    const node = tileExpression(lifted.expr, scope, req)
+    // A postfix step that *is* the whole expression under a `"tos"` demand
+    // leaves its value in the slot `PUSH` already reserved, so the consumer
+    // reads it there: no load back, and nothing to reclaim.
+    // A full-word `into` narrows nothing (types.ts), so it does not stand in
+    // the way; a narrow one does, and takes the tiled assignment instead.
+    const narrows = req.into !== undefined && req.into !== "u32" && req.into !== "i32"
 
-    return {fragment: [...lifted.prelude, ...node.fragment], tosDelta: node.tosDelta}
+    if(sugared.type === "UpdateExpression" && !sugared.prefix && req.demand === "tos" && !narrows)
+    {
+        const inTos = postfixToTos<E>(sugared, scope)
+        if(inTos) return {fragment: inTos, tosDelta: 1}
+    }
+
+    // A lifted temporary is read once by the tiling below and dead after
+    // it, so it is reclaimed here rather than left to the enclosing block's
+    // `BLOCK_END` — `DROP #n` at a scope no block boundary closes
+    // (isa-core.md §4.4), the same shape `lowerBareBlock` uses, and a child
+    // scope for the same reason: the parent's numbering has to survive it.
+    // A `"tos"` demand is the one that cannot, its result sitting above them.
+    const reclaims = needsLift(sugared) && req.demand !== "tos"
+    const inner = reclaims ? new RegAlloc<E>(scope) : scope
+
+    const lifted = lift(sugared, inner)
+    const node = tileExpression(lifted.expr, inner, req)
+
+    return {
+        fragment: [...lifted.prelude, ...node.fragment, ...scopeCleanup<E>(inner.depth - scope.depth)],
+        tosDelta: node.tosDelta,
+    }
 }
 
 /** Lower a single, standalone procedure body — the common case for tests
