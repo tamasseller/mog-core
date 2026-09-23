@@ -431,7 +431,7 @@ function decodeProcBody<E extends { ext: string } = ExtOpPayload>(bytes: Uint8Ar
  *
  *  Returns `next` (the offset immediately past the last body byte), not
  *  just the program — a container holding more than one encoded program
- *  back-to-back (docs/codec-image.md §7) has no other way to know where
+ *  back-to-back (docs/codec-image.md §4) has no other way to know where
  *  this one ends and the next begins, since nothing here is
  *  self-delimiting from the *outside*. */
 export function decodeProgram<E extends { ext: string } = ExtOpPayload>(bytes: Uint8Array, offset: number = 0, extension?: Extension<E>): { program: RtlProgram<E>; next: number }
