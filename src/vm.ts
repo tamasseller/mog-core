@@ -265,6 +265,10 @@ function runProc<E extends { ext: string } = ExtOpPayload>(program: RtlProgram<E
             steps += result.steps
             return result.acc
         },
+        trap(code: number): never
+        {
+            throw new Trap(code, steps, depth)
+        },
     }
 
     function operand(i: RtlInstr<E>): number

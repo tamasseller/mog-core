@@ -123,7 +123,7 @@ function evalRaisedProgram(
             {
                 case StmtKind.Assign: slots[s.slot] = evalExpr(s.value, slots); break
                 case StmtKind.ExprStmt: evalExpr(s.value, slots); break
-                case StmtKind.Return: throw new RaisedReturn(evalExpr(s.value, slots))
+                case StmtKind.Return: throw new RaisedReturn(s.value ? evalExpr(s.value, slots) : 0)
                 case StmtKind.Trap: throw new RaisedTrap(s.code)
 
                 case StmtKind.Dispatch:
@@ -724,6 +724,19 @@ describe("raise: EXT — killsAcc (the op is a statement, never a value)", () =>
         const raisedResult = evalRaisedProgram(raised, ext)
         assert.ok(raisedResult.ok, `raised tree trapped (code ${raisedResult.trapCode})`)
         assert.equal(raisedResult.acc, vmResult.acc)
+    })
+
+    test("a void procedure may return straight after a kill op, with no value", () =>
+    {
+        const ext = killAccExtension()
+        const program: RtlProgram = {
+            procedures: [{ argCount: 0, body: [{ op: "CONST", imm: 5 }, { op: "PUSH" }, extInstr("STASH", []), { op: "RETURN" }] }],
+        }
+        assert.equal(run(program, ext).accLive, false)
+
+        const body = raiseProgram(program, ext)[0]!.body
+        assert.ok(body.some(st => st.kind === StmtKind.ExprStmt && st.value.kind === ExprKind.Ext))
+        assert.deepEqual(body[body.length - 1], { kind: StmtKind.Return })
     })
 })
 

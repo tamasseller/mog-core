@@ -162,6 +162,9 @@ export interface ExecState
     reg(index: number): number
     setReg(index: number, value: number): void
     callProc(calleeIndex: number, args: readonly number[]): number
+    /** Ends the program as `TRAP #code` would. Absent in an evaluator
+     *  whose extensions never trap. */
+    trap?(code: number): never
 }
 
 export interface ExtCodec<E extends { ext: string } = ExtOpPayload>

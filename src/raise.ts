@@ -111,7 +111,8 @@ export type Stmt<E extends { ext: string } = ExtOpPayload> =
     | {kind: StmtKind.ExprStmt; value: Expr<E>}
     | {kind: StmtKind.Dispatch; test: Expr<E>; cases: Stmt<E>[][]}
     | {kind: StmtKind.Loop; pre: boolean; cond: Stmt<E>[]; test: Expr<E>; body: Stmt<E>[]}
-    | {kind: StmtKind.Return; value: Expr<E>}
+    /** `value` is absent only where a void procedure returns with acc destroyed. */
+    | {kind: StmtKind.Return; value?: Expr<E>}
     | {kind: StmtKind.Trap; code: number}
 
 export interface RaisedProc<E extends { ext: string } = ExtOpPayload>
@@ -449,7 +450,7 @@ class Raiser<E extends { ext: string } = ExtOpPayload>
 
                 case "RETURN":
                 {
-                    stmts.push({kind: StmtKind.Return, value: this.readAcc()})
+                    stmts.push(this.acc || this.returnsValue ? {kind: StmtKind.Return, value: this.readAcc()} : {kind: StmtKind.Return})
                     this.acc = undefined
                     this.pc++
                     return {stmts, close: "terminated"}

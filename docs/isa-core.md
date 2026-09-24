@@ -834,7 +834,10 @@ Expressions: C's operators with C's precedence, except `/` and `%` (no
 opcode — §4.1); `=` and compound assignment; prefix and postfix `++`/`--`;
 `&&`/`||`, short-circuiting; the conditional operator; narrowing casts
 (§10.4); integer literals (decimal, `0x…`, `0b…`); function calls;
-parenthesization. Statements: expression statements; `if`/`else`, `while`,
+parenthesization. Compile-time string literals, `"…"` with `\"` and `\\` as
+the only escapes, and byte strings, `x"…"` in lowercase hex pairs: legal
+only as a built-in's argument (§10.5), which an extension's rule matches
+in place; anywhere else is a type error, since the ISA has no string value. Statements: expression statements; `if`/`else`, `while`,
 `do`/`while`, `for`, `switch`/`case`/`default`/`break`, `return`; block
 statements `{ … }`, both as the direct body of a branch or loop and
 standalone. Declarations: any number of locals per statement (`u32 a, b = 1;`),
@@ -872,8 +875,8 @@ of the enclosing block.
   is a subset of C, so it may refuse a spelling, but must not disagree with
   C about what one means.
 - `/` and `%`, which parse but have no opcode to lower to (§4.1).
-- Comma operator, `sizeof`, non-integer literals, storage qualifiers, the
-  preprocessor.
+- Comma operator, `sizeof`, floating-point and character literals, storage
+  qualifiers, the preprocessor.
 
 ### 10.4 Types
 
@@ -992,6 +995,9 @@ only `max(N-1, 0)` of its arguments are expected on the stack, the last
 (if any) already in `acc`. Its call target folds into the same call-graph
 accounting as an ordinary `CALL` for §8.2's acyclicity check and §8.3's
 depth bound.
+
+An opcode that is not a terminator may still end the program as `TRAP`
+does, on a condition only its execution can decide (a checksum mismatch).
 
 A program containing an extension opcode with no matching effect
 declaration is rejected: an opcode the validator has no effect information

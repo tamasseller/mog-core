@@ -19,8 +19,10 @@ import
         isEastBinary,
         isEastCall,
         isEastUnary,
+        isBytesLiteral,
         isIdentifier,
         isLiteral,
+        isStringLiteral,
         isRtlNode,
         RtlNode,
     } from "./east"
@@ -48,6 +50,13 @@ export interface IdentifierPattern {kind: "Identifier"}
  * `LiteralPattern` instead — see matchAllEast's `"Const"` case.
  */
 export interface ConstPattern {kind: "Const"}
+
+export interface StringPattern {kind: "String"}
+export interface BytesPattern {kind: "Bytes"}
+
+/** A constant, a string or a byte string: one element of a name/value
+ *  parameter list, whose names say which each value must be. */
+export interface ImmediatePattern {kind: "Immediate"}
 
 export interface RtlPattern
 {
@@ -132,6 +141,8 @@ export interface BuiltinCallPattern<
 // a concrete `RtlNode`, so they're the only ones parameterized by `E`.
 
 export interface LiteralMatch {kind: "Literal"; value: number}
+export interface StringMatch {kind: "String"; value: string}
+export interface BytesMatch {kind: "Bytes"; value: readonly number[]}
 export interface IdentifierMatch {kind: "Identifier"; name: string}
 export interface RtlMatch<E extends { ext: string } = ExtOpPayload> {kind: "Rtl"; node: RtlNode<E>}
 
@@ -184,6 +195,9 @@ export interface BuiltinCallMatch<AM extends readonly EastMatch[] = readonly Eas
 export type EastPattern =
     | LiteralPattern
     | ConstPattern
+    | StringPattern
+    | BytesPattern
+    | ImmediatePattern
     | IdentifierPattern
     | RtlPattern
     | BinaryPattern
@@ -194,6 +208,8 @@ export type EastPattern =
 
 export type EastMatch<E extends { ext: string } = ExtOpPayload> =
     | LiteralMatch
+    | StringMatch
+    | BytesMatch
     | IdentifierMatch
     | RtlMatch<E>
     | BinaryMatch<EastMatch<E>, EastMatch<E>>
@@ -207,6 +223,9 @@ export type EastMatch<E extends { ext: string } = ExtOpPayload> =
 export type MatchOf<P extends EastPattern, E extends { ext: string } = ExtOpPayload> =
     P extends LiteralPattern ? LiteralMatch
     : P extends ConstPattern ? LiteralMatch
+    : P extends StringPattern ? StringMatch
+    : P extends BytesPattern ? BytesMatch
+    : P extends ImmediatePattern ? LiteralMatch | StringMatch | BytesMatch
     : P extends IdentifierPattern ? IdentifierMatch
     : P extends RtlPattern ? RtlMatch<E>
     : P extends BinaryPattern<infer L, infer R>
@@ -270,9 +289,21 @@ export function matchAllEast<P extends EastPattern, E extends { ext: string } = 
                 // `N` here is always a genuine child of whatever node the
                 // enclosing `tileNode` call is computing, never that same node.
                 if(isLiteral(N)) return [{kind: "Literal", value: N.value} as MatchOf<P, E>]
+                if(isStringLiteral(N) || isBytesLiteral(N)) return []
                 const values = new Set(tile(N).filter(isLiteral).map(c => c.value))
                 return [...values].map(value => ({kind: "Literal", value} as MatchOf<P, E>))
             }
+
+        case "String":
+            return isStringLiteral(N) ? [{kind: "String", value: N.value} as MatchOf<P, E>] : []
+
+        case "Bytes":
+            return isBytesLiteral(N) ? [{kind: "Bytes", value: N.value} as MatchOf<P, E>] : []
+
+        case "Immediate":
+            if(isStringLiteral(N)) return [{kind: "String", value: N.value} as MatchOf<P, E>]
+            if(isBytesLiteral(N)) return [{kind: "Bytes", value: N.value} as MatchOf<P, E>]
+            return matchAllEast(N, pConst(), tile) as MatchOf<P, E>[]
 
         case "Identifier":
             return isIdentifier(N)
@@ -386,6 +417,9 @@ export function matchAllEast<P extends EastPattern, E extends { ext: string } = 
 
 export const pLiteral = (): LiteralPattern => ({kind: "Literal"})
 export const pConst = (): ConstPattern => ({kind: "Const"})
+export const pString = (): StringPattern => ({kind: "String"})
+export const pBytes = (): BytesPattern => ({kind: "Bytes"})
+export const pImmediate = (): ImmediatePattern => ({kind: "Immediate"})
 export const pIdentifier = (): IdentifierPattern => ({kind: "Identifier"})
 
 export const pRtl = (output?: OutputLocation): RtlPattern =>

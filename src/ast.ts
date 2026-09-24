@@ -145,6 +145,8 @@ export type Expression =
     | UpdateExpression
     | CallExpression
     | Literal
+    | StringLiteral
+    | BytesLiteral
     | Identifier
 
 export type AssignmentOperator =
@@ -237,6 +239,22 @@ export interface Literal
 {
     type: "Literal"
     value: number
+    raw: string
+}
+
+/** A compile-time string, for an extension op's operand; never a value. */
+export interface StringLiteral
+{
+    type: "StringLiteral"
+    value: string
+    raw: string
+}
+
+/** `x"0a1b"`: a compile-time byte string, like `StringLiteral`. */
+export interface BytesLiteral
+{
+    type: "BytesLiteral"
+    value: readonly number[]
     raw: string
 }
 

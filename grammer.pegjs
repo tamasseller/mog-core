@@ -226,6 +226,8 @@ LeftHandSideExpression
 
 PrimaryExpression
   = Literal
+  / StringLiteral
+  / BytesLiteral
   / CastExpression
   / CallExpression
   / Identifier
@@ -280,6 +282,23 @@ OctalLiteral
 DecimalLiteral
   = digits:$[0-9]+ { 
       return { type: "Literal", value: parseInt(digits, 10), raw: text() }; 
+    }
+
+// Compile-time only: legal as a built-in's argument, nowhere else (types.ts).
+StringLiteral
+  = '"' chars:StringChar* '"' {
+      return { type: "StringLiteral", value: chars.join(""), raw: text() };
+    }
+
+StringChar
+  = '\\' c:["\\] { return c; }
+  / [^"\\\n]
+
+BytesLiteral
+  = 'x"' digits:$([0-9a-f][0-9a-f])* '"' {
+      const value = [];
+      for(let i = 0; i < digits.length; i += 2) value.push(parseInt(digits.slice(i, i + 2), 16));
+      return { type: "BytesLiteral", value, raw: text() };
     }
 
 Identifier

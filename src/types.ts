@@ -85,6 +85,8 @@ function coerce(value: Typed, target: PrimType): Expression
     return NARROWING.has(target) ? castTo(target, value.expr) : value.expr
 }
 
+const isStringLike = (e: Expression): boolean => e.type === "StringLiteral" || e.type === "BytesLiteral"
+
 function walk(node: Expression, env: TypeEnv, wantsValue: boolean = true): Typed
 {
     switch(node.type)
@@ -94,6 +96,10 @@ function walk(node: Expression, env: TypeEnv, wantsValue: boolean = true): Typed
             // as the only candidates. The grammar has no negative literal —
             // unary minus is its own node — so this is total.
             return {expr: node, type: node.value <= 0x7fffffff ? "i32" : "u32"}
+
+        case "StringLiteral":
+        case "BytesLiteral":
+            throw new Error(`A string literal (${node.raw}) is only valid as a built-in's argument`)
 
         case "Identifier":
             return {expr: node, type: env.typeOf(node.name) ?? DEFAULT_TYPE}
@@ -154,7 +160,7 @@ function walk(node: Expression, env: TypeEnv, wantsValue: boolean = true): Typed
             // call: still a plain word, and its arguments still annotated,
             // each an expression in its own right.
             const sig = env.signatureOf?.(node.callee.name)
-            if(sig === undefined) return {expr: mapOver(node, a => walk(a, env).expr), type: DEFAULT_TYPE}
+            if(sig === undefined) return {expr: mapOver(node, a => isStringLike(a) ? a : walk(a, env).expr), type: DEFAULT_TYPE}
 
             if(sig.returns === "void" && wantsValue)
                 throw new Error(`Call to '${node.callee.name}' is used as a value, but the procedure returns none`)

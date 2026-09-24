@@ -5,14 +5,16 @@
  * leaves produced by rule application. Internal nodes are EAST variants of the
  * AST nodes, where every `Expression`-typed child is widened to `EastExpression`
  * (so an `RtlNode` can occupy any child slot once rewritten). Leaf nodes
- * (`Literal`, `Identifier`) are reused from the AST as-is.
+ * (the literals, `Identifier`) are reused from the AST as-is.
  */
 
 import type {
     AssignmentOperator,
     BinaryOperator,
+    BytesLiteral,
     Identifier,
     Literal,
+    StringLiteral,
     UnaryOperator,
 } from "./ast"
 
@@ -36,7 +38,7 @@ export interface RtlNode<E extends { ext: string } = ExtOpPayload>
 }
 
 // EAST variants of internal AST nodes — children widened to EastExpression.
-// Leaf nodes (Literal, Identifier) are reused from the AST.
+// Leaf nodes (the literals, Identifier) are reused from the AST.
 
 export interface EastBinary<E extends { ext: string } = ExtOpPayload>
 {
@@ -73,6 +75,8 @@ export interface EastCall<E extends { ext: string } = ExtOpPayload>
 
 export type EastExpression<E extends { ext: string } = ExtOpPayload> =
     | Literal
+    | StringLiteral
+    | BytesLiteral
     | Identifier
     | EastBinary<E>
     | EastUnary<E>
@@ -85,6 +89,12 @@ export const isRtlNode = <E extends { ext: string } = ExtOpPayload>(N: EastExpre
 
 export const isLiteral = <E extends { ext: string } = ExtOpPayload>(N: EastExpression<E>): N is Literal =>
     N.type === "Literal"
+
+export const isStringLiteral = <E extends { ext: string } = ExtOpPayload>(N: EastExpression<E>): N is StringLiteral =>
+    N.type === "StringLiteral"
+
+export const isBytesLiteral = <E extends { ext: string } = ExtOpPayload>(N: EastExpression<E>): N is BytesLiteral =>
+    N.type === "BytesLiteral"
 
 export const isIdentifier = <E extends { ext: string } = ExtOpPayload>(N: EastExpression<E>): N is Identifier =>
     N.type === "Identifier"

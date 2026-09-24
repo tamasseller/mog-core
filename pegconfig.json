@@ -20,6 +20,8 @@
         "PostfixExpression": "import(\"./ast.js\").UpdateExpression",
         "CallExpression": "import(\"./ast.js\").CallExpression",
         "Literal": "import(\"./ast.js\").Literal",
+        "StringLiteral": "import(\"./ast.js\").StringLiteral",
+        "BytesLiteral": "import(\"./ast.js\").BytesLiteral",
         "Identifier": "import(\"./ast.js\").Identifier",
         "LeftHandSideExpression": "import(\"./ast.js\").Identifier",
         "CastExpression": "import(\"./ast.js\").CastExpression",

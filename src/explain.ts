@@ -37,6 +37,9 @@ export function explainFailure<E extends { ext: string }>(expr: Expression, scop
  *  it is a consequence of that one. */
 function deepestUntileable<E extends { ext: string }>(e: Expression, rules: readonly Rule<E>[]): Expression | undefined
 {
+    // Matched in place by its call's pattern, never tiled on its own.
+    if(e.type === "StringLiteral" || e.type === "BytesLiteral") return undefined
+
     const inChild = recurseOver<Expression | undefined, Expression | undefined>(
         e, c => deepestUntileable(c, rules), (...v) => v.find(x => x !== undefined), undefined)
 
